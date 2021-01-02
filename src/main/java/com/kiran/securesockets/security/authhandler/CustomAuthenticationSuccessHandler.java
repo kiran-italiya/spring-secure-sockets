@@ -1,4 +1,4 @@
-package com.kiran.securesockets.security.authentication;
+package com.kiran.securesockets.security.authhandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +59,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
 			HttpSession session = request.getSession(false);
 
-			List<Object[]> userId = ((List<?>) manager.createNativeQuery("SELECT u.userid, concat(u.firstname, ' ', u.lastname) AS fullname FROM users u WHERE u.userid = :username")
+			List<Object[]> userId = ((List<?>) manager.createNativeQuery("SELECT u.userid, concat(u.firstname, ' ', u.lastname) AS fullname FROM users u WHERE upper(u.username) = upper(:username)")
 					.setParameter("username", username)
 					.getResultList())
 					.stream()

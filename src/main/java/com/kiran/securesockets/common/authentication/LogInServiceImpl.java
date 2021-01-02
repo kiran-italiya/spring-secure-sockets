@@ -1,4 +1,4 @@
-package com.kiran.securesockets.authentication;
+package com.kiran.securesockets.common.authentication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,4 +1,4 @@
-package com.kiran.securesockets.authentication;
+package com.kiran.securesockets.common.authentication;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

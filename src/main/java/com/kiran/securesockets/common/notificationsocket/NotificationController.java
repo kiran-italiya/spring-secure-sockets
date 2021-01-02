@@ -30,13 +30,8 @@ public class NotificationController {
 	}
 
 	@MessageMapping("/notification/post/mark_read")
-//	@SendToUser(destinations = "/queue/notification")
 	public void markNotificationAsRead(@Payload String[] ids, MessageHeaders headers, Principal user){
 		service.markAsRead(ids, user.getName());
-//		HashMap<String, Object> map = new HashMap<>();
-//		map.put("type", NotificationTypes.PUSH_NOTIFICATIONS);
-//		map.put("data", service.markAsRead(ids));
-//		return map;
 	}
 
 }

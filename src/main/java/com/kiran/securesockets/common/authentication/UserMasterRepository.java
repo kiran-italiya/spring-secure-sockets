@@ -1,4 +1,4 @@
-package com.kiran.securesockets.authentication;
+package com.kiran.securesockets.common.authentication;
 
 import com.kiran.securesockets.common.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

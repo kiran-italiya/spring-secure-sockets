@@ -39,7 +39,7 @@ public class PasswordUtil {
 	private static final String SECRET_KEY_FACTORY = "PBKDF2WithHmacSHA256";
 	private static final String PADDING_MODE = "AES/GCM/NoPadding";
 
-	private static final String INIT_VECTOR = System.getenv("password-encryption.init-vector");
+	private static final String INIT_VECTOR = System.getenv("password-encryption-init-vector");
 
 	private static final String LENGTH_ERROR = "Invalid password length found. Only >= 8 length is allowed.";
 

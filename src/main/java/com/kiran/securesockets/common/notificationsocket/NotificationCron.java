@@ -1,6 +1,6 @@
 package com.kiran.securesockets.common.notificationsocket;
 
-import com.kiran.securesockets.authentication.CustomUserDetails;
+import com.kiran.securesockets.common.authentication.CustomUserDetails;
 import com.kiran.securesockets.common.utils.TextEncryptDecrypt;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,8 @@ public class NotificationCron {
 					manager = entityManagerFactory.createEntityManager();
 
 					ArrayList<NotificationDTO> notifications = new ArrayList<>();
-					List<Object[]> rows = ((List<Object>) manager.createNativeQuery("select u.userid, n.notification_id,n.type,n.payload from user_notifications un join users u on un.user_id=u.userid and u.active=1 join notifications n on un.notification_id=n.notification_id where un.read=0 and u.userid=:userName").setParameter("userName", userName).getResultList()).stream().map(i -> ((Object[]) i)).collect(Collectors.toList());
+					List<Object[]> rows = ((List<Object>) manager.createQuery("select u.userId, n.notificationId,n.type,n.payload from UserNotification un join User u on un.userId=u.userId and u.active=1 join Notification n on un.notificationId=n.notificationId where un.read=0 and u.userName=:userName")
+							.setParameter("userName", userName).getResultList()).stream().map(i -> ((Object[]) i)).collect(Collectors.toList());
 
 					NotificationDTO notification;
 					for (Object[] row : rows) {

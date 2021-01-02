@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 @Entity
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-@Table(name = "notifications")
+@Table(name = "user_notifications")
 @IdClass(UserNotificationPK.class)
 public class UserNotification implements Serializable {
 

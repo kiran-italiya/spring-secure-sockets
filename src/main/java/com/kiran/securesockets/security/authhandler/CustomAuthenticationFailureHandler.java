@@ -1,4 +1,4 @@
-package com.kiran.securesockets.security.authentication;
+package com.kiran.securesockets.security.authhandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;

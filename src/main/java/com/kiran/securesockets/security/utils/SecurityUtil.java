@@ -9,7 +9,7 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.servlet.http.HttpSession;
 
 @Component
-public class SecurityUtils {
+public class SecurityUtil {
 
 	private static final ResponseStatusException UNAUTHORIZED_EXCEPTION = new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Session is expired.");
 

@@ -1,10 +1,10 @@
 package com.kiran.securesockets.security;
 
-import com.kiran.securesockets.authentication.CustomUserDetailsService;
-import com.kiran.securesockets.security.authentication.CustomAuthenticationFailureHandler;
-import com.kiran.securesockets.security.authentication.CustomAuthenticationProvider;
-import com.kiran.securesockets.security.authentication.CustomAuthenticationSuccessHandler;
-import com.kiran.securesockets.security.authentication.CustomLogoutSuccessHandler;
+import com.kiran.securesockets.common.authentication.CustomUserDetailsService;
+import com.kiran.securesockets.security.authhandler.CustomAuthenticationFailureHandler;
+import com.kiran.securesockets.security.authhandler.CustomAuthenticationProvider;
+import com.kiran.securesockets.security.authhandler.CustomAuthenticationSuccessHandler;
+import com.kiran.securesockets.security.authhandler.CustomLogoutSuccessHandler;
 import com.kiran.securesockets.security.session.CustomSessionInformationExpiredStrategy;
 import com.kiran.securesockets.security.xss.XSSFilter;
 import org.apache.catalina.filters.RemoteIpFilter;

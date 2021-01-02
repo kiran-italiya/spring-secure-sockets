@@ -1,6 +1,6 @@
-package com.kiran.securesockets.security.authentication;
+package com.kiran.securesockets.security.authhandler;
 
-import com.kiran.securesockets.authentication.CustomUserDetails;
+import com.kiran.securesockets.common.authentication.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.*;

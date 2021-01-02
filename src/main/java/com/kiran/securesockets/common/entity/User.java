@@ -17,6 +17,7 @@ public class User implements java.io.Serializable {
 	private static final long serialVersionUID = -1694497762144469655L;
 	private long userId;
 	private String userName;
+	private int userType;
 	private String firstName;
 	private String lastName;
 	private String email;
@@ -35,6 +36,15 @@ public class User implements java.io.Serializable {
 
 	public void setUserId(long userId) {
 		this.userId = userId;
+	}
+
+	@Column(name = "type", nullable = false)
+	public int getUserType() {
+		return userType;
+	}
+
+	public void setUserType(int userType) {
+		this.userType = userType;
 	}
 
 	@Column(name = "firstName", nullable = false, length = 64)
@@ -133,25 +143,37 @@ public class User implements java.io.Serializable {
 		if (this == o) return true;
 		if (!(o instanceof User)) return false;
 
-		User that = (User) o;
+		User user = (User) o;
 
-		if (userId != that.userId) return false;
-		if (active != that.active) return false;
-		if (!password.equals(that.password)) return false;
-		if (!secretKey.equals(that.secretKey)) return false;
-		if (!customSalt.equals(that.customSalt)) return false;
-		return userName.equals(that.userName);
+		if (userId != user.userId) return false;
+		if (userType != user.userType) return false;
+		if (active != user.active) return false;
+		if (createdBy != user.createdBy) return false;
+		if (userName != null ? !userName.equals(user.userName) : user.userName != null) return false;
+		if (firstName != null ? !firstName.equals(user.firstName) : user.firstName != null) return false;
+		if (lastName != null ? !lastName.equals(user.lastName) : user.lastName != null) return false;
+		if (email != null ? !email.equals(user.email) : user.email != null) return false;
+		if (password != null ? !password.equals(user.password) : user.password != null) return false;
+		if (secretKey != null ? !secretKey.equals(user.secretKey) : user.secretKey != null) return false;
+		if (customSalt != null ? !customSalt.equals(user.customSalt) : user.customSalt != null) return false;
+		return createdOn != null ? createdOn.equals(user.createdOn) : user.createdOn == null;
 
 	}
 
 	@Override
 	public int hashCode() {
 		int result = (int) (userId ^ (userId >>> 32));
-		result = 31 * result + password.hashCode();
-		result = 31 * result + secretKey.hashCode();
-		result = 31 * result + customSalt.hashCode();
+		result = 31 * result + (userName != null ? userName.hashCode() : 0);
+		result = 31 * result + userType;
+		result = 31 * result + (firstName != null ? firstName.hashCode() : 0);
+		result = 31 * result + (lastName != null ? lastName.hashCode() : 0);
+		result = 31 * result + (email != null ? email.hashCode() : 0);
+		result = 31 * result + (password != null ? password.hashCode() : 0);
+		result = 31 * result + (secretKey != null ? secretKey.hashCode() : 0);
+		result = 31 * result + (customSalt != null ? customSalt.hashCode() : 0);
 		result = 31 * result + active;
-		result = 31 * result + userName.hashCode();
+		result = 31 * result + (int) (createdBy ^ (createdBy >>> 32));
+		result = 31 * result + (createdOn != null ? createdOn.hashCode() : 0);
 		return result;
 	}
 }

@@ -5,7 +5,7 @@ import com.kiran.securesockets.common.notificationsocket.entity.Notification;
 import com.kiran.securesockets.common.notificationsocket.entity.UserNotification;
 import com.kiran.securesockets.common.utils.GetIpmac;
 import com.kiran.securesockets.common.utils.TextEncryptDecrypt;
-import com.kiran.securesockets.security.utils.SecurityUtils;
+import com.kiran.securesockets.security.utils.SecurityUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 @Service
-// TODO: modify queries
 public class NotificationService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -35,7 +34,7 @@ public class NotificationService {
 	private HttpSession session;
 
 	@Autowired
-	private SecurityUtils securityUtils;
+	private SecurityUtil securityUtil;
 
 	@Autowired
 	private EntityManagerFactory entityManagerFactory;
@@ -54,7 +53,9 @@ public class NotificationService {
 		ArrayList<NotificationDTO> notifications = new ArrayList<>();
 		try {
 			manager = entityManagerFactory.createEntityManager();
-			List<Object[]> rows = ((List<Object>) manager.createNativeQuery("select spn.notification_id, spn.type, spn.payload from user_notifications sun join notifications spn on spn.notification_id=sun.notification_id and sun.read=0 where sun.user_id=:userId").setParameter("userId", securityUtils.getUserId(session)).getResultList()).stream().map(row -> (Object[]) row).collect(Collectors.toList());
+			List<Object[]> rows = ((List<Object>) manager.createQuery("select spn.notificationId, spn.type, spn.payload from UserNotification sun join Notification spn on spn.notificationId=sun.notificationId and sun.read=0 where sun.userId=:userId")
+					.setParameter("userId", securityUtil.getUserId(session))
+					.getResultList()).stream().map(row -> (Object[]) row).collect(Collectors.toList());
 			NotificationDTO notification;
 			for (Object[] row : rows) {
 				notification = new NotificationDTO(textEncryptDecrypt.encrypt(row[0].toString()), row[1].toString(), row[2].toString());
@@ -73,17 +74,17 @@ public class NotificationService {
 
 	public String[] markAsRead(String[] notificationIds, String userName) {
 		EntityManager manager = null;
-		EntityTransaction  transaction = null;
+		EntityTransaction transaction = null;
 		try {
-			if(notificationIds.length>0){
+			if (notificationIds.length > 0) {
 				StringJoiner joiner = new StringJoiner(",", "(", ")");
-				for(int i=0;i<notificationIds.length;i++){
-					joiner.add("'"+textEncryptDecrypt.decrypt(notificationIds[i])+"'");
+				for (int i = 0; i < notificationIds.length; i++) {
+					joiner.add("'" + textEncryptDecrypt.decrypt(notificationIds[i]) + "'");
 				}
 				manager = entityManagerFactory.createEntityManager();
 				transaction = manager.getTransaction();
 				transaction.begin();
-				manager.createNativeQuery("update user_notifications sun join users um on um.userid=sun.user_id and um.active=1 set sun.read=1, sun.read_time=current_timestamp() where sun.read=0 and um.userid=:userName and sun.notification_id in "+joiner.toString()).setParameter("userName", userName).executeUpdate();
+				manager.createNativeQuery("update user_notifications sun join users um on um.userid=sun.user_id and um.active=1 set sun.read=1, sun.read_time=current_timestamp() where sun.read=0 and um.username=:userName and sun.notification_id in " + joiner.toString()).setParameter("userName", userName).executeUpdate();
 				transaction.commit();
 			}
 			return notificationIds;
@@ -97,63 +98,48 @@ public class NotificationService {
 		return new String[]{};
 	}
 
-	public void saveNotificationForUsers(String type, Object payload, List<String> userIds, EntityManager manager){
-		try {
+	public void saveNotificationForUsers(String type, Object payload, List<Long> userIds, EntityManager manager) throws Exception {
 
-			Notification pushNotification = context.getBean(Notification.class);
-			pushNotification.setType(type);
-			pushNotification.setPayload(mapper.writeValueAsString(payload));
-			pushNotification.setCreatedBy(securityUtils.getUserId(session));
-			pushNotification.setCreatedOn(new Timestamp(System.currentTimeMillis()));
-			pushNotification.setIpAddress(request.getRemoteAddr());
-			pushNotification.setMacAddress(GetIpmac.getClientMACAddress(request.getRemoteAddr()));
+		Notification pushNotification = context.getBean(Notification.class);
+		pushNotification.setType(type);
+		pushNotification.setPayload(mapper.writeValueAsString(payload));
+		pushNotification.setCreatedBy(securityUtil.getUserId(session));
+		pushNotification.setCreatedOn(new Timestamp(System.currentTimeMillis()));
+		pushNotification.setIpAddress(request.getRemoteAddr());
+		pushNotification.setMacAddress(GetIpmac.getClientMACAddress(request.getRemoteAddr()));
 
-			pushNotification = manager.merge(pushNotification);
-			manager.flush();
+		pushNotification = manager.merge(pushNotification);
+		manager.flush();
 
-			UserNotification userNotification;
-			for(String userId : userIds){
-				userNotification = context.getBean(UserNotification.class);
-				userNotification.setNotificationId(pushNotification.getNotificationId());
-				userNotification.setRead(false);
-				userNotification.setUserId(Long.parseLong(userId));
-				manager.merge(userNotification);
-			}
-
-		} catch (Exception e) {
-			logger.error("{}", e);
+		UserNotification userNotification;
+		for (long userId : userIds) {
+			userNotification = context.getBean(UserNotification.class);
+			userNotification.setNotificationId(pushNotification.getNotificationId());
+			userNotification.setRead(false);
+			userNotification.setUserId(userId);
+			userNotification = manager.merge(userNotification);
 		}
 	}
 
-	public void saveNotificationForUsersType(String type, Object payload, List<String> userTypeIds, EntityManager manager){
-		try {
-			StringJoiner stringJoiner = new StringJoiner(",");
-			userTypeIds.forEach(stringJoiner::add);
-			List<Long> userIds = ((List<Object>) manager.createNativeQuery("select distinct userid from users where usertypeid in (:userTypeIds) and active=1").setParameter("userTypeIds", stringJoiner).getResultList()).stream().map(row -> ((Long) row)).collect(Collectors.toList());
+	public void saveBroadcastNotification(String type, Object payload, EntityManager manager) throws Exception {
 
-			if(userIds.size()>0){
-				Notification pushNotification = context.getBean(Notification.class);
-				pushNotification.setType(type);
-				pushNotification.setPayload(mapper.writeValueAsString(payload));
-				pushNotification.setCreatedBy(securityUtils.getUserId(session));
-				pushNotification.setCreatedOn(new Timestamp(System.currentTimeMillis()));
-				pushNotification.setIpAddress(request.getRemoteAddr());
-				pushNotification.setMacAddress(GetIpmac.getClientMACAddress(request.getRemoteAddr()));
+		List<Long> userIds = ((List<Object>) manager.createQuery("select distinct u.userId from User u where u.active=1").getResultList()).stream().map(row -> ((Long) row)).collect(Collectors.toList());
 
-				pushNotification = manager.merge(pushNotification);
-
-				UserNotification userNotification;
-				for(Long userId : userIds){
-					userNotification = context.getBean(UserNotification.class);
-					userNotification.setNotificationId(pushNotification.getNotificationId());
-					userNotification.setRead(false);
-					userNotification.setUserId(userId);
-					userNotification = manager.merge(userNotification);
-				}
-			}
-		} catch (Exception e) {
-			logger.error("{}", e);
+		if (userIds.size() > 0) {
+			saveNotificationForUsers(type, payload, userIds, manager);
 		}
+
+	}
+
+	public void saveNotificationForUsersType(String type, Object payload, List<String> userTypeIds, EntityManager manager) throws Exception {
+//		StringJoiner stringJoiner = new StringJoiner(",");
+//		userTypeIds.forEach(stringJoiner::add);
+		List<Long> userIds = ((List<Object>) manager.createQuery("select distinct u.userId from User u where u.userType in (:userTypeIds) and u.active=1").setParameter("userTypeIds", userTypeIds).getResultList()).stream().map(row -> ((Long) row)).collect(Collectors.toList());
+
+		if (userIds.size() > 0) {
+			saveNotificationForUsers(type, payload, userIds, manager);
+		}
+
 	}
 
 
