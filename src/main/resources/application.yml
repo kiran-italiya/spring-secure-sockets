@@ -1,0 +1,63 @@
+#custom-config
+my-app:
+  server:
+    url: http://localhost:8080          # for static-files web-server address
+
+  text-encryption:
+    key: ${text-encryption-key}
+    init-vector: ${text-encryption-init-vector}
+
+
+#server-config
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+#database and jpa/hibernate-config
+spring:
+  mvc:
+    view:
+      prefix: /WEB-INF/
+      suffix: .jsp
+      
+  security:
+    strategy: MODE_INHERITABLETHREADLOCAL
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+      file-size-threshold: 0B
+  output:
+    ansi: 
+      enabled: NEVER
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3308/springsockets?useSSL=false&zeroDateTimeBehavior=convertToNull&useUnicode=true&characterEncoding=UTF-8
+    username: root
+    password: root
+    
+    tomcat:
+     default-auto-commit: true
+     max-active: 10
+     min-idle: 5
+     max-wait: 36000
+     maxAge: 100000
+     test-on-connect: true
+     test-on-borrow: true
+     test-on-return: true
+     removeAbandoned: true
+     removeAbandonedTimeout: 10
+     minEvictableIdleTimeMillis: 30000
+     jmxEnabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    open-in-view: false
+    hibernate:
+      naming:
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: false
